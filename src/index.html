@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!-- The generated javascript and app.js will be substituted in below -->
+  <!-- JAVASCRIPT -->
+  <script>
+    /* Functionality for tabs - navigation */
+    function openTab(evt, tabName) {
+      var i, tabcontent, tablinks;
+      tabcontent = document.getElementsByClassName("tabcontent");
+      for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+      }
+      tablinks = document.getElementsByClassName("tablinks");
+      for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].className = tablinks[i].className.replace(" active", "");
+      }
+      document.getElementById(tabName).style.display = "block";
+      evt.currentTarget.className += " active";
+    }
+  </script>
+
+  <!-- The app.css contents will be substituted in below -->
+  <link rel="stylesheet" href="./css/style.css">
+  <!-- Bootstrap -->
+  <!-- <link href="css/bootstrap.min.css" rel="stylesheet"> -->
+  <!-- STYLE -->
+</head>
+
+<body>
+  <div id="status">Test</div>
+  <div class="container">
+    <!-- Token info -->
+    <header>
+      <h1 id="token-name">Real Estate</h1>
+      <!-- <p id="token-symbol">(symbol)</p> -->
+      <hr>
+    </header>
+
+    <!-- Navigation -->
+    <div class="tab">
+      <button class="tablinks" onclick="openTab(event, 'transfer')">Transfer</button>
+      <button class="tablinks" onclick="openTab(event, 'split')">Split</button>
+      <button class="tablinks" onclick="openTab(event, 'balances')">Balances</button>
+      <button class="tablinks" onclick="openTab(event, 'plots-info')">Plots</button>
+      <p id="total-supply">Total supply: <span>0</span></p>
+      <p id="your-balance">Your balance: <span>0</span></p>
+    </div>
+
+    <!-- Sending section -->
+    <div id="transfer" class="tabcontent">
+      <h2>Transfer your Tokens to other wallet</h2>
+      <div class="input-group">
+        <h3>To</h3>
+        <input type="text" id="send-address" placeholder="Enter address..." />
+      </div>
+      <div class="input-group">
+        <h3>Amount</h3>
+        <input type="number" id="send-amount" placeholder="Enter amount..." />
+      </div>
+      <div class="input-group" style="text-align: center">
+        <button class="btn" id="button-send">Send</button>
+      </div>
+    </div>
+
+    <!-- Split section -->
+    <div id="split" class="tabcontent">
+      <h2>Split a plat to ...</h2>
+      <div class="input-group">
+        <!-- <h3>Plat ID</h3> -->
+        <input type="number" id="plat-id" placeholder="Plat ID">
+
+        <!-- <h3>Amount</h3> -->
+        <input type="number" id="split-amount" placeholder="Enter amount..." />
+      </div>
+      <div class="input-group" style="text-align: center">
+        <button class="btn" id="button-split">Split it</button>
+      </div>
+    </div>
+
+    <!-- Check balances of other wallets -->
+    <div id="balances" class="tabcontent">
+      <h2>Check balance of other wallets</h2>
+      <div class="input-group">
+        <h3>Address</h3>
+        <input type="text" id="balance-address" placeholder="Enter address..." />
+      </div>
+      <div class="input-group" style="text-align: center">
+        <button class="btn" id="button-check">Check balance</button>
+      </div>
+    </div>
+
+
+    <div id="plots-info" class="tabcontent">
+      <h2>The all plots information of you</h2>
+      <div class="input-group">
+        <h3>Address</h3>
+        <input type="text" id="balance-address" placeholder="Enter address..." />
+      </div>
+      <div class="input-group" style="text-align: center">
+        <button class="btn" id="button-check">Check balance</button>
+      </div>
+    </div>
+  </div>
+
+
+
+
+  <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+  <!-- Include all compiled plugins (below), or include individual files as needed -->
+  <script src="js/bootstrap.min.js"></script>
+  <script src="js/web3.min.js"></script>
+  <script src="js/truffle-contract.js"></script>
+  <script src="js/app.js"></script>
+</body>
+
+</html>
