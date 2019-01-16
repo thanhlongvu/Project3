@@ -19,6 +19,11 @@
       document.getElementById(tabName).style.display = "block";
       evt.currentTarget.className += " active";
     }
+
+
+    function allPlot() {
+
+    }
   </script>
 
   <!-- The app.css contents will be substituted in below -->
@@ -40,39 +45,56 @@
 
     <!-- Navigation -->
     <div class="tab">
+      <button class="tablinks" onclick="openTab(event, 'create')">Create</button>
       <button class="tablinks" onclick="openTab(event, 'transfer')">Transfer</button>
       <button class="tablinks" onclick="openTab(event, 'split')">Split</button>
       <button class="tablinks" onclick="openTab(event, 'balances')">Balances</button>
       <button class="tablinks" onclick="openTab(event, 'plots-info')">Plots</button>
-      <p id="total-supply">Total supply: <span>0</span></p>
+      <!-- <p id="total-supply">Total supply: <span>0</span></p> -->
       <p id="your-balance">Your balance: <span>0</span></p>
     </div>
 
+    <!-- Create Plot section -->
+    <div id="create" class="tabcontent">
+        <h1>Create a plot</h2>
+        <div class="input-group">
+          <h4>Area</h4>
+          <input type="text" id="area-info" placeholder="Enter area..." />
+        </div>
+        <div class="input-group">
+            <h4>Position</h4>
+            <input type="text" id="pos-info" placeholder="Enter position..." />
+          </div>
+        <div class="input-group" style="text-align: center">
+          <button class="btn" id="button-create">Create</button>
+        </div>
+      </div>
+
     <!-- Sending section -->
     <div id="transfer" class="tabcontent">
-      <h2>Transfer your Tokens to other wallet</h2>
+      <h2>Transfer your plot to other wallet</h2>
       <div class="input-group">
-        <h3>To</h3>
+        <h4>To</h4>
         <input type="text" id="send-address" placeholder="Enter address..." />
       </div>
       <div class="input-group">
-        <h3>Amount</h3>
-        <input type="number" id="send-amount" placeholder="Enter amount..." />
+        <h4>Plot ID</h4>
+        <input type="number" id="send-plotId" placeholder="Enter plot Id..." />
       </div>
       <div class="input-group" style="text-align: center">
-        <button class="btn" id="button-send">Send</button>
+        <button class="btn" id="button-send">Transfer</button>
       </div>
     </div>
 
     <!-- Split section -->
     <div id="split" class="tabcontent">
-      <h2>Split a plat to ...</h2>
+      <h2>Split a plot</h2>
       <div class="input-group">
-        <!-- <h3>Plat ID</h3> -->
-        <input type="number" id="plat-id" placeholder="Plat ID">
+        <h4>Plot ID</h4>
+        <input type="number" id="plot-id" placeholder="Enter plot ID">
 
-        <!-- <h3>Amount</h3> -->
-        <input type="number" id="split-amount" placeholder="Enter amount..." />
+        <h4>Area</h4>
+        <input type="number" id="split-amount" placeholder="Enter a plot" />
       </div>
       <div class="input-group" style="text-align: center">
         <button class="btn" id="button-split">Split it</button>
@@ -83,8 +105,11 @@
     <div id="balances" class="tabcontent">
       <h2>Check balance of other wallets</h2>
       <div class="input-group">
-        <h3>Address</h3>
+        <h4>Address</h4>
         <input type="text" id="balance-address" placeholder="Enter address..." />
+      </div>
+      <div class="input-group">
+        <h2 id="balance-info"></h2>
       </div>
       <div class="input-group" style="text-align: center">
         <button class="btn" id="button-check">Check balance</button>
@@ -94,13 +119,15 @@
 
     <div id="plots-info" class="tabcontent">
       <h2>The all plots information of you</h2>
-      <div class="input-group">
+      <!-- <div class="input-group">
         <h3>Address</h3>
         <input type="text" id="balance-address" placeholder="Enter address..." />
       </div>
       <div class="input-group" style="text-align: center">
         <button class="btn" id="button-check">Check balance</button>
-      </div>
+      </div> -->
+
+      <!-- <div id="all-plot-info"></div> -->
     </div>
   </div>
 

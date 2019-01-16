@@ -58,19 +58,8 @@ App = {
 
         });
 
-        // return App.bindEvents();
-
-        //more...
-        // App.contracts.TokenERC20.deployed().then(function(instance) {
-        //   console.log(instance);
-        // }).catch (function(err) {
-        //   console.log(err.message);
-        // });
     },
 
-    // bindEvents: function () {
-    //   $(document).on('click', '.btn-adopt', App.handleAdopt);
-    // },
 
     getInstance: function (adopters, account) {
         App.contracts.TokenERC20.deployed().then(function (instance) {
@@ -81,51 +70,10 @@ App = {
         }).catch(function (err) {
             console.log(err.message);
         });
-        //   return adoptionInstance.getAdopters.call();
-        // }).then(function (adopters) {
-        //   for (i = 0; i < adopters.length; i++) {
-        //     if (adopters[i] !== '0x0000000000000000000000000000000000000000') {
-        //       $('.panel-pet').eq(i).find('button').text(adopters[i]).attr('disabled', true);
-        //     }
-        //     else {
-        //       $('.panel-pet').eq(i).find('button').text('Adopt');
-        //     }
-        //   }
-        // }).catch(function (err) {
-        //   console.log(err.message);
-        // });
 
-        //onReady
         this.onReady();
     },
 
-    //   handleAdopt: function (event) {
-    //     event.preventDefault();
-
-    //     var petId = parseInt($(event.target).data('id'));
-
-    //     var adoptionInstance;
-
-    //     web3.eth.getAccounts(function (error, accounts) {
-    //       if (error) {
-    //         console.log(error);
-    //       }
-
-    //       var account = accounts[0];
-
-    //       App.contracts.Adoption.deployed().then(function (instance) {
-    //         adoptionInstance = instance;
-
-    //         // Execute adopt as a transaction by sending account
-    //         return adoptionInstance.adopt(petId, { from: account });
-    //       }).then(function (result) {
-    //         return App.markAdopted();
-    //       }).catch(function (err) {
-    //         console.log(err.message);
-    //       });
-    //     });
-
-    //   }
 
     ////////////////////////////// more//////////////////////////
     updateTotal: function () {
@@ -154,23 +102,27 @@ App = {
         var that = this;
         App.contracts.TokenERC20.deployed().then(function (instance) {
 
-            that.getBalance(instance, window.web3.eth.accounts[0], function (error, balance) {
+            instance.balanceOf({from: window.web3.eth.accounts[0]}).then(function (balance, error) {
+                // console.log(balance);
                 if (error) {
                     console.log(error)
                 }
+
                 else {
                     // Get number of decimals
-                    instance.decimals().then(function (decimals, err) {
-                        if (err) {
-                            console.log(err.mesage);
-                        } else {
-                            var decimalsCount = Math.pow(10, decimals);
-                            if (decimalsCount > 0)
-                                $("#your-balance span").html(balance.toNumber() / decimalsCount); // Convert userBalance according to count of decimals
-                            else
-                                showStatus("ERROR: Dividing by zero");
-                        }
-                    });
+                    // instance.decimals().then(function (decimals, err) {
+                    //     if (err) {
+                    //         console.log(err.mesage);
+                    //     } else {
+                    //         var decimalsCount = Math.pow(10, decimals);
+                    //         if (decimalsCount > 0)
+                    //             $("#your-balance span").html(balance.toNumber() / decimalsCount); // Convert userBalance according to count of decimals
+                    //         else
+                    //             showStatus("ERROR: Dividing by zero");
+                    //     }
+                    // });
+
+                    $("#your-balance span").html(balance.toNumber());
                 }
             })
         })
@@ -183,15 +135,76 @@ App = {
         })
     },
 
+
+    createTokens: function () {
+        var that = this;
+
+        // Get input values
+        var area = $("#area-info").val();
+        var pos = $("#pos-info").val();
+
+        // pos *= 10;
+        // area *= 10;
+
+        // Convert amount according to count of decimals
+        // amount = amount * Math.pow(10, 5);
+
+
+        //TODO: Validate area
+
+        // Validate amount
+        if (!isValidAmount(area)) {
+            showStatus("Please enter valid area");
+            return;
+        }
+
+        App.contracts.TokenERC20.deployed().then(function (instance) {
+            // Transfer amount to other address
+            instance.createPlot(area, pos.toString() , { from: window.web3.eth.accounts[0] })
+                .then(function (txHash, error) {
+                    if (error) {
+                        console.log(error);
+                    }
+                    else {
+                        console.log(txHash);
+                        showStatus("Sending transaction, please wait");
+                        that.waitForReceipt(txHash.tx, function (receipt) {
+                            if (receipt.status) {
+                                showStatus("Transaction successful");
+                                // $("#send-address").val("");
+                                // $("#send-amount").val("");
+                                that.updateUserBalance();
+                            }
+                            else {
+                                var userBalance = $("#your-balance span").val();
+                                if (amount > userBalance) {
+                                    showStatus("You don't have enough Tokens");
+                                    return;
+                                }
+                                showStatus("Something went wrong, please try it again");
+                            }
+                        });
+                    }
+                }
+                )
+
+        }).catch(function (err) {
+            console.log(err.message);
+        });
+    },
+
+
+
+
     sendTokens: function () {
         var that = this;
 
         // Get input values
         var address = $("#send-address").val();
-        var amount = $("#send-amount").val();
+        var plotId = $("#send-plotId").val();
 
         // Convert amount according to count of decimals
-        amount = amount * Math.pow(10, 5);
+        // amount = amount * Math.pow(10, 5);
 
         // Validate address
         if (!isValidAddress(address)) {
@@ -200,14 +213,14 @@ App = {
         }
 
         // Validate amount
-        if (!isValidAmount(amount)) {
+        if (!isValidAmount(plotId)) {
             showStatus("Please enter valid amount");
             return;
         }
 
         App.contracts.TokenERC20.deployed().then(function (instance) {
             // Transfer amount to other address
-            instance.transfer(address.toString(), amount, { from: window.web3.eth.accounts[0], gas: 100000, gasPrice: 100000, gasLimit: 100000 })
+            instance.transfer(address.toString(), plotId, { from: window.web3.eth.accounts[0] })
                 .then(function (txHash, error) {
                     if (error) {
                         console.log(error);
@@ -219,7 +232,7 @@ App = {
                             if (receipt.status) {
                                 showStatus("Transaction successful");
                                 $("#send-address").val("");
-                                $("#send-amount").val("");
+                                $("#send-plotId").val("");
                                 that.updateUserBalance();
                             }
                             else {
@@ -264,24 +277,27 @@ App = {
     },
 
 
-    burnTokens: function () {
+    splitTokens: function () {
         var that = this;
 
         // Get input values
-        var amount = $("#split-amount").val();
+        var plotId = $("#plot-id").val();
+        var area = $("#split-amount").val();
+
 
         // Convert amount according to count of decimals
-        amount = amount * Math.pow(10, 5);
+        // amount = amount * Math.pow(10, 5);
 
         // Validate amount
-        if (!isValidAmount(amount)) {
+        if (!isValidAmount(area)) {
             showStatus("Please enter valid amount");
             return;
         }
 
+    
         App.contracts.TokenERC20.deployed().then(function (instance) {
             // Transfer amount to other address
-            instance.burn(amount, { from: window.web3.eth.accounts[0], gas: 100000, gasPrice: 100000, gasLimit: 100000 })
+            instance.splitPlot(plotId, area, { from: window.web3.eth.accounts[0] })
             .then(function (txHash, error) {
                     if (error) {
                         console.log(error);
@@ -289,17 +305,18 @@ App = {
                     else {
                         that.waitForReceipt(txHash.tx, function (receipt) {
                             if (receipt.status) {
-                                showStatus("Burning successful");
-                                $("#burn-amount").val("");
+                                showStatus("Split successful");
+                                $("#plot-id").val("");
+                                $("#split-amount").val("");
                                 that.updateUserBalance();
-                                that.updateTotal();
+                                // that.updateTotal();
                             }
                             else {
                                 var userBalance = $("#your-balance span").val();
-                                if (amount > userBalance) {
-                                    showStatus("You don't have enough Tokens");
-                                    return;
-                                }
+                                // if (amount > userBalance) {
+                                //     showStatus("You don't have enough Tokens");
+                                //     return;
+                                // }
                                 showStatus("Something went wrong, please try it again");
                             }
                         });
@@ -356,12 +373,16 @@ App = {
     bindButtons: function () {
         var that = this;
 
+        $(document).on("click", "#button-create", function () {
+            that.createTokens();
+        });
+
         $(document).on("click", "#button-send", function () {
             that.sendTokens();
         });
 
-        $(document).on("click", "#button-burn", function () {
-            that.burnTokens();
+        $(document).on("click", "#button-split", function () {
+            that.splitTokens();
         });
 
         $(document).on("click", "#button-check", function () {
@@ -441,7 +462,7 @@ App = {
 
 // Basic validation of amount. Bigger than 0 and typeof number
 function isValidAmount(amount) {
-    return amount > 0 && typeof Number(amount) == 'number';
+    return amount >= 0 && typeof Number(amount) == 'number';
 }
 
 // Check if it has the basic requirements of an address

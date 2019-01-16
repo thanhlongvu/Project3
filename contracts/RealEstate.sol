@@ -10,6 +10,7 @@ contract AccessControl {
         _;
     }
 
+    
 
     constructor() public {
         ownerDapp = msg.sender;
@@ -57,7 +58,8 @@ contract PlotBase is AccessControl, User {
 
         // more info for the plot
         // .......
-        uint _s;
+        uint area;
+        string pos;
 
     }
 
@@ -88,7 +90,7 @@ contract PlotBase is AccessControl, User {
     //methods
 
     /// User want create a plot infors of the plot 
-    function createPlot(uint _s) public onlyUser returns(uint) {
+    function createPlot(uint _area, string memory _pos) public returns(uint) {
         //Info valid???
         //require()???
 
@@ -96,10 +98,22 @@ contract PlotBase is AccessControl, User {
         //Get info to a object
         uint64 _id = plotTotal;
 
-        Plot memory _plot = Plot(_id ,msg.sender, new address[](0), StatePlot.UNFINISHED, _s);
+
+        //TODO:demo: StatePlot.UNFINISHED
+        Plot memory _plot = Plot(_id ,msg.sender, new address[](0), StatePlot.READY, _area, _pos);
         plotTotal++;
+
+        //TODO:demo
+        plots.push(_plot);
+
         //store to plot array
-        plotsUnfinish.push(_plot);
+        // plotsUnfinish.push(_plot);
+
+        //Increase owner
+        countPlotOwner[msg.sender]++;
+
+        //set owner
+        idPlotToOwner[_id] = msg.sender;
 
 
         return (_id);
@@ -135,17 +149,18 @@ contract PlotBase is AccessControl, User {
 
 
     /// split in half the plot
-    function splitPlot(uint _id, uint _decreaseS) external onlyUser{
+    function splitPlot(uint _id, uint _decreaseArea) external onlyOwner(_id) {
         //TODO:ref to this plot
         Plot storage _plot = plots[_id];
 
-        require(_decreaseS < _plot._s);
+        require(_decreaseArea < _plot.area, "Can't split with this area");
+        // assert(_decreaseArea < _plot.area);
         //decrease 's' of this plot
-        _plot._s -= _decreaseS;
+        _plot.area -= _decreaseArea;
 
 
         //Crease a new plot
-        uint _newPlot = this.createPlot(_decreaseS);
+        createPlot(_decreaseArea, _plot.pos);
     }
 }
 
@@ -156,9 +171,13 @@ contract PlotBase is AccessControl, User {
 
 
 
-contract PlotOwnership is PlotBase {
+// contract PlotOwnership is PlotBase {
+contract TokenERC20 is PlotBase {
+    // mapping (uint => address) approveToken;
 
-    mapping (uint => address) approveToken;
+    string public name;
+    string public symbol;
+    uint8 public decimals;
 
     event Transfer(
         address indexed from,
@@ -172,17 +191,22 @@ contract PlotOwnership is PlotBase {
         uint256 value
     );
 
+    // constructor() public {
+    //     name = "Real Estate";             // Set the name for display purposes
+    //     symbol = "RE";
+    //     decimals = 1;
+    // }
+
 
     function totalSupply() external view returns (uint256) {
         return plotTotal;
     }
 
-    function balanceOf(address who) external view returns (uint256) {
-        return countPlotOwner[who];
+    function balanceOf() external view returns (uint256) {
+        return countPlotOwner[msg.sender];
     }
 
     
-
 
     function toString(address x) internal pure returns (string memory) {
         bytes memory b = new bytes(20);
@@ -192,7 +216,9 @@ contract PlotOwnership is PlotBase {
     }
 
     function transfer(address to, uint256 value) external onlyOwner(value) returns (bool){
-        require(plots[value].state == StatePlot.READY);
+        if(plots[value].state != StatePlot.READY) {
+            return false;
+        }
         //transfer to new owner
         Plot storage _plot = plots[value];
         
@@ -205,5 +231,7 @@ contract PlotOwnership is PlotBase {
         //change count plot of 2 owner
         countPlotOwner[msg.sender]--;
         countPlotOwner[to]++;
+
+        return true;
     }
 }
